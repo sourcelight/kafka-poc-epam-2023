@@ -1,4 +1,13 @@
-plugins {
+pluginManagement {
+    repositories {
+        //maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+        gradlePluginPortal()
+    }
+}
+
+
+plugins{
     id("com.gradle.enterprise") version("3.9")
 }
 
@@ -17,6 +26,5 @@ gradleEnterprise {
 rootProject.name = 'kafka-poc-epam-2023'
 include 'kafka-producer'
 include 'kafka-consumer'
-
-
+include 'common'
 

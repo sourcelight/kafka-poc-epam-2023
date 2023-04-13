@@ -1,0 +1,20 @@
+group 'dev.rbruno.common.model.kafka'
+version '1.0-SNAPSHOT'
+
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+
+configurations {
+    implementation {
+        dependencies {
+            exclude group: "org.apache.kafka"
+        }
+    }
+}

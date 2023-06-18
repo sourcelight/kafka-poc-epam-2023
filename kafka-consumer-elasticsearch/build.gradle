@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.kafka:kafka-clients:2.3.0'
+
+    implementation('org.elasticsearch.client:elasticsearch-rest-high-level-client:7.3.2') {
+        exclude group: 'org.elasticsearch', module: 'elasticsearch-x-content'
+        exclude group: 'org.elasticsearch', module: 'elasticsearch'
+        exclude group: 'org.elasticsearch', module: 'elasticsearch-core'
+        exclude group: 'org.elasticsearch.client', module: 'elasticsearch-rest-client'
+    }
+    implementation 'org.elasticsearch:elasticsearch:7.3.2'
+    implementation 'org.elasticsearch:elasticsearch-x-content:7.3.2'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.3.2'
+
+    implementation 'com.google.code.gson:gson:2.8.9'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}

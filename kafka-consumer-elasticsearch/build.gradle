@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.kafka:kafka-clients:2.3.0'
+    implementation 'org.apache.kafka:kafka-clients:3.5.0'
 
     implementation('org.elasticsearch.client:elasticsearch-rest-high-level-client:7.3.2') {
         exclude group: 'org.elasticsearch', module: 'elasticsearch-x-content'

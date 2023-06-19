@@ -1,6 +1,9 @@
 package dev.rbruno.es.consumer;
 
 import com.google.gson.JsonParser;
+import dev.rbruno.es.consumer.config.ConfigProperties;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -21,27 +24,46 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import org.elasticsearch.common.xcontent.XContentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
+@Component
+@Slf4j
+@EnableConfigurationProperties(ConfigProperties.class)
+@RequiredArgsConstructor
 public class ElasticSearchConsumer {
-    static private Logger logger = LoggerFactory.getLogger(ElasticSearchConsumer.class.getName());
+    private final ConfigProperties  configProperties ;
+    @Value("${credentials.username}")
+    private String username;
+    @Value("${credentials.password}")
+    private String password;
+    @Value("${credentials.hostname}")
+    private String hostname;
 
-    public static void main(String[] args) throws IOException {
+    @PostConstruct
+    public void run() throws IOException {
+        consumer();
+    }
+
+    public void consumer() throws IOException {
         RestHighLevelClient client = createClient();
-        KafkaConsumer<String, String> consumer = createConsumer("random_sentences");
-
+        KafkaConsumer<String, String> consumer = createConsumer(configProperties.topic());
+        //configProperties.hostname().toString()
         // poll for new data
         while(true) {
             try {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100)); // new in Kafka 2.0.0+
                 Integer recordCount = records.count();
-                logger.info("Received " + recordCount + " records.");
+                log.info("Received " + recordCount + " records.");
                 BulkRequest bulkRequest = new BulkRequest();
 
                 for (ConsumerRecord<String, String> record : records) {
@@ -61,20 +83,20 @@ public class ElasticSearchConsumer {
 
                         bulkRequest.add(indexRequest);
                     } catch (NullPointerException e) {
-                        logger.warn("skipping bad record: " + record.value());
+                        log.warn("skipping bad record: " + record.value());
                     }
 
                 }
                 if (recordCount > 0) {
                     BulkResponse bulkItemResponses = client.bulk(bulkRequest, RequestOptions.DEFAULT);
-                    logger.info("Committing offsets...");
+                    log.info("Committing offsets...");
                     consumer.commitSync();
-                    logger.info("Offsets committed.");
+                    log.info("Offsets committed.");
                 } else {
-                    logger.info("No records to commit.");
+                    log.info("No records to commit.");
                 }
             }catch (Exception e){
-                logger.error("Error in the loop: "+e.getMessage() +" cause: "+e.getCause(),e);
+                log.error("Error in the loop: "+e.getMessage() +" cause: "+e.getCause(),e);
             }
 
         }
@@ -89,12 +111,12 @@ public class ElasticSearchConsumer {
         return jsonParser.parse(tweetJson).getAsJsonObject().get("id").getAsString();
     }
 
-    public static KafkaConsumer<String, String> createConsumer(String topic){
+    public  KafkaConsumer<String, String> createConsumer(String topic){
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "kafka-demo-elasticsearch1");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, configProperties.groupId());
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // latest: read since last offset
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"); // disable auto commit of offsets
         properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10"); // limit records retrieved
@@ -109,10 +131,7 @@ public class ElasticSearchConsumer {
         return consumer;
     }
 
-    public static RestHighLevelClient createClient() {
-        String hostname = "kafka-course-6940755027.us-east-1.bonsaisearch.net";
-        String username = "z6q9snpm9y";
-        String password = "2dml8dgyuz";
+    public  RestHighLevelClient createClient() {
 
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));

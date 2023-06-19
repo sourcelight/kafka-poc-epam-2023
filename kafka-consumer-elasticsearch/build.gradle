@@ -1,6 +1,14 @@
 plugins {
     id 'java'
+    id 'java-library'
 }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+sourceCompatibility =
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -21,6 +29,7 @@ dependencies {
     implementation 'org.elasticsearch:elasticsearch:7.3.2'
     implementation 'org.elasticsearch:elasticsearch-x-content:7.3.2'
     implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.3.2'
+
 
     implementation 'com.google.code.gson:gson:2.8.9'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

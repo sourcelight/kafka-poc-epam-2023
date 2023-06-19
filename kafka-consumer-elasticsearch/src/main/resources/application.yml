@@ -1,0 +1,5 @@
+external_path: C:/job_local/properties/credentials.yml
+
+kafka:
+  topic: random_sentences
+  group-id: esConsumer

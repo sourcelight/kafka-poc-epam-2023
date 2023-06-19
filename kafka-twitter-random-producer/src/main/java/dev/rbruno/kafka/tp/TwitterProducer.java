@@ -16,7 +16,7 @@ public class TwitterProducer {
 
     private String bearerToken = "YOUR_BEARER_TOKEN";
     //private String topic = "twitter_tweets";
-    private String topic = "random_sentences";
+    private String topic = "random_sentences1";
 
     /**
      * This class is the orchestrator: it calls the TwitterProducerThread class as thread and starts it.

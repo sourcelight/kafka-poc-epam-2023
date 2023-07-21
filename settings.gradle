@@ -25,7 +25,7 @@ gradleEnterprise {
 
 rootProject.name = 'kafka-poc-epam-2023'
 include 'kafka-producer'
-include 'kafka-consumer'
 include 'kafka-consumer-elasticsearch'
 include 'kafka-twitter-random-producer'
+include 'producer-consumer'
 
